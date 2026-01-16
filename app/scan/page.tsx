@@ -10,7 +10,7 @@ export default async function ScanPage({ searchParams }: ScanPageProps) {
   }
 
   const res = await fetch(
-    'https://future-identity.vercel.app/api/qr/validate',
+    `${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/qr/validate`,
     {
       method: 'POST',
       body: JSON.stringify({ id }),

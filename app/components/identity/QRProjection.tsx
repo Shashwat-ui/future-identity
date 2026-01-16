@@ -7,6 +7,11 @@ interface QRProjectionProps {
   payload: IdentityPayload;
 }
 
+function joinUrl(base: string, path: string) {
+  // Remove trailing slash from base, leading slash from path, then join
+  return `${base.replace(/\/+$/, '')}/${path.replace(/^\/+/, '')}`;
+}
+
 export default function QRProjection({ payload }: QRProjectionProps) {
   const [qrId, setQrId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -56,11 +61,12 @@ export default function QRProjection({ payload }: QRProjectionProps) {
   }
 
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || origin;
+  const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || origin || '').replace(/\/+$/, '');
+  const qrUrl = joinUrl(baseUrl, `scan?id=${qrId}`);
 
   return (
     <div className="relative p-6 rounded-2xl bg-black/40 backdrop-blur-xl shadow-xl shadow-black/40">
-      <QRCode value={`${baseUrl}/scan?id=${qrId}`} size={220} />
+      <QRCode value={qrUrl} size={220} />
       <p className="mt-4 text-xs opacity-60 text-center">Valid for 10 minutes</p>
     </div>
   );
