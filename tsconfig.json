@@ -1,5 +1,9 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+	  "@/*": ["./app/*"]
+	},
     "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
@@ -18,9 +22,7 @@
         "name": "next"
       }
     ],
-    "paths": {
-      "@/*": ["./*"]
-    }
+    
   },
   "include": [
     "next-env.d.ts",
@@ -32,3 +34,4 @@
   ],
   "exclude": ["node_modules"]
 }
+
