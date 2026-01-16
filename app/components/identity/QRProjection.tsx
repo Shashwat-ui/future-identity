@@ -35,7 +35,7 @@ export default function QRProjection({ payload }: QRProjectionProps) {
         }
       } catch (err) {
         if (!cancelled) {
-          setError('Unable to generate QR. Please try again.');
+          setError('Unable to generate QR. Please try again.' + err);
         }
       }
     }
