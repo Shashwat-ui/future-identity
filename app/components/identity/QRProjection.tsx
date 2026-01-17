@@ -67,7 +67,11 @@ export default function QRProjection({ payload }: QRProjectionProps) {
   return (
     <div className="relative p-6 rounded-2xl bg-black/40 backdrop-blur-xl shadow-xl shadow-black/40">
       <QRCode value={qrUrl} size={220} />
-      <p className="mt-4 text-xs opacity-60 text-center">Valid for 10 minutes</p>
+      <p className="mt-4 text-xs opacity-60 text-white text-center">Valid for 10 minutes</p>
+      {/* <div className="mt-2 text-xs text-center break-all text-cyan-300 bg-black/30 rounded p-2 select-all">
+        <span>QR Link:</span><br />
+        {qrUrl}
+      </div> */}
     </div>
   );
 }
