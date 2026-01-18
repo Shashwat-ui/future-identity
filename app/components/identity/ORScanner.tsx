@@ -3,10 +3,11 @@ import { useEffect, useRef, useState } from "react";
 
 export default function QRScanner({ onScan, onClose }: { onScan: (data: string) => void; onClose: () => void }) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [error, setError] = useState<string | null>(null);
   const readerRef = useRef<BrowserQRCodeReader | null>(null);
+  const scannedRef = useRef(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Stop camera safely
+  // stop camera safely
   const stopCamera = () => {
     const video = videoRef.current;
     if (!video || !video.srcObject) return;
@@ -16,31 +17,30 @@ export default function QRScanner({ onScan, onClose }: { onScan: (data: string) 
   };
 
   useEffect(() => {
-    let cancelled = false;
+    if (!videoRef.current) return;
+    scannedRef.current = false;
     const reader = new BrowserQRCodeReader();
     readerRef.current = reader;
-    setError(null);
 
-    // Use decodeOnceFromVideoDevice for a single scan
-    reader
-      .decodeOnceFromVideoDevice(undefined, videoRef.current!)
-      .then((result) => {
-        if (!cancelled && result) {
+    reader.decodeFromVideoDevice(
+      undefined,
+      videoRef.current,
+      (result, err) => {
+        if (result && !scannedRef.current) {
+          scannedRef.current = true;
           onScan(result.getText());
+          stopCamera();
         }
-      })
-      .catch((err) => {
-        if (!cancelled) {
-          if (err && err.name === "NotAllowedError") {
-            setError("Camera access denied. Please allow camera permission.");
-          } else {
-            setError("Scanning failed, please try again.");
-          }
+        if (err && err.name === 'NotAllowedError') {
+          setError('Camera access denied. Please allow camera permission.');
+        } else if (err && err.name !== 'NotFoundException') {
+          setError('Scanning failed, please try again.');
         }
-      });
+      }
+    );
 
     return () => {
-      cancelled = true;
+      scannedRef.current = true;
       stopCamera();
       readerRef.current = null;
     };
@@ -48,56 +48,28 @@ export default function QRScanner({ onScan, onClose }: { onScan: (data: string) 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-lg">
-      <div className="relative p-8 rounded-3xl bg-gradient-to-br from-cyan-900 via-cyan-700 to-cyan-400 shadow-2xl border-4 border-cyan-300 animate-futuristic-glow">
+      <div className="relative p-8 rounded-3xl bg-linear-to-br from-cyan-900 via-cyan-700 to-cyan-400 shadow-2xl border-4 border-cyan-300 animate-futuristic-glow">
         <video ref={videoRef} className="w-[320px] h-80 rounded-2xl border-4 border-cyan-400 shadow-lg" />
         <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
           {/* Futuristic animated border */}
           <svg width="340" height="340" className="absolute">
-            <rect
-              x="10"
-              y="10"
-              width="320"
-              height="320"
-              rx="32"
-              fill="none"
-              stroke="cyan"
-              strokeWidth="4"
-              strokeDasharray="20 10"
-              className="animate-border"
-            />
+            <rect x="10" y="10" width="320" height="320" rx="32" fill="none" stroke="cyan" strokeWidth="4" strokeDasharray="20 10" className="animate-border" />
           </svg>
         </div>
-        <button
-          onClick={() => {
-            stopCamera();
-            onClose();
-          }}
-          className="absolute top-4 right-4 bg-cyan-400 text-white rounded-full px-4 py-2 shadow-lg hover:bg-cyan-600 transition"
-        >
+        <button onClick={() => { stopCamera(); onClose(); }} className="absolute top-4 right-4 bg-cyan-400 text-white rounded-full px-4 py-2 shadow-lg hover:bg-cyan-600 transition">
           Close
         </button>
         {error && <div className="text-red-400 mt-2">{error}</div>}
         <style jsx>{`
           @keyframes futuristic-glow {
-            0%,
-            100% {
-              box-shadow: 0 0 40px 10px cyan;
-            }
-            50% {
-              box-shadow: 0 0 80px 20px #00fff7;
-            }
+            0%, 100% { box-shadow: 0 0 40px 10px cyan; }
+            50% { box-shadow: 0 0 80px 20px #00fff7; }
           }
-          .animate-futuristic-glow {
-            animation: futuristic-glow 2s infinite;
-          }
+          .animate-futuristic-glow { animation: futuristic-glow 2s infinite; }
           @keyframes border {
-            to {
-              stroke-dashoffset: 60;
-            }
+            to { stroke-dashoffset: 60; }
           }
-          .animate-border {
-            animation: border 2s linear infinite;
-          }
+          .animate-border { animation: border 2s linear infinite; }
         `}</style>
       </div>
     </div>
