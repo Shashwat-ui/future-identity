@@ -23,28 +23,28 @@ export default function QRScanner({ onScan, onClose }: { onScan: (data: string) 
     readerRef.current = reader;
 
     reader.decodeFromVideoDevice(
-      undefined,
-      videoRef.current,
-      (result, err) => {
-        if (result && !scannedRef.current) {
-          scannedRef.current = true;
-          onScan(result.getText());
-          stopCamera();
-        }
-        if (err && err.name === 'NotAllowedError') {
-          setError('Camera access denied. Please allow camera permission.');
-        } else if (err && err.name !== 'NotFoundException') {
-          setError('Scanning failed, please try again.');
-        }
-      }
-    );
-
+  undefined,
+  videoRef.current,
+  (result, err) => {
+    if (result && !scannedRef.current) {
+      scannedRef.current = true;
+      onScan(result.getText());
+      stopCamera();
+    }
+    // Only set error once, and only for real errors
+    if (err && err.name === 'NotAllowedError' && !error) {
+      setError('Camera access denied. Please allow camera permission.');
+    } else if (err && err.name !== 'NotFoundException' && !error) {
+      setError('Scanning failed, please try again.');
+    }
+  }
+);
     return () => {
       scannedRef.current = true;
       stopCamera();
       readerRef.current = null;
     };
-  }, [onScan]);
+  }, [onScan, error]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-lg">

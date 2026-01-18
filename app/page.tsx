@@ -100,6 +100,7 @@ export default function Home() {
       {scanning && (
         <QRScanner
           onScan={(data) => {
+            console.log("Scanned data:", data);
             setScannedData(data);
             setScanning(false);
           }}
