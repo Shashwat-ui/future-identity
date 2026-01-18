@@ -2,6 +2,8 @@
 "use client";
 import { useState } from "react";
 import QRProjection from '@/components/identity/QRProjection';
+import { FaQrcode } from "react-icons/fa6";
+import QRScanner from "./components/identity/ORScanner";
 
 const options = [
   {
@@ -65,6 +67,8 @@ export default function Home() {
   const [selected, setSelected] = useState<Option | null>(null);
   const [form, setForm] = useState<FormState>({});
   const [showQR, setShowQR] = useState(false);
+  const [scanning, setScanning] = useState(false);
+  const [scannedData, setScannedData] = useState<string | null>(null);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
@@ -84,6 +88,33 @@ export default function Home() {
   return (
     <main className="min-h-screen max-h-screen w-full flex flex-col items-center relative overflow-y-scroll">
       <div className="fixed inset-0 -z-10 bg-[url('/bg.jpg.jpg')] bg-cover bg-center" />
+        <div className="flex justify-center mb-8 mt-4">
+        <button
+          onClick={() => setScanning(true)}
+          className="group flex items-center gap-3 px-6 py-3 rounded-full bg-linear-to-r from-cyan-400 via-cyan-600 to-cyan-900 shadow-2xl border-2 border-cyan-300 hover:scale-105 transition-all duration-300 animate-futuristic-glow"
+        >
+          <FaQrcode className="text-3xl animate-pulse" />
+          <span className="font-bold text-lg text-white group-hover:text-cyan-300 transition">Scan QR</span>
+        </button>
+      </div>
+      {scanning && (
+        <QRScanner
+          onScan={(data) => {
+            setScannedData(data);
+            setScanning(false);
+          }}
+          onClose={() => setScanning(false)}
+        />
+      )}
+        {scannedData && (
+        <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black/80 z-50">
+          <div className="bg-white/10 p-8 rounded-2xl shadow-xl border border-cyan-300 text-white max-w-lg">
+            <h2 className="text-2xl font-bold mb-4">Scanned Data</h2>
+            <pre className="whitespace-pre-wrap wrap-break-words">{scannedData}</pre>
+            <button onClick={() => setScannedData(null)} className="mt-4 px-6 py-2 rounded-full bg-cyan-400 text-white font-semibold hover:bg-cyan-600 transition">Close</button>
+          </div>
+        </div>
+      )}
       <div className="w-full max-w-2xl mx-auto px-4 py-10">
         <div className="flex flex-col gap-10 items-center">
           <h1 className="text-4xl md:text-5xl font-extrabold text-center text-white drop-shadow-lg tracking-tight mb-2">
