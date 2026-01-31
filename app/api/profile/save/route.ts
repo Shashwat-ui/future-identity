@@ -14,17 +14,24 @@ export async function POST(req: NextRequest) {
     }
 
     console.log('🔍 Checking if user exists:', userId);
-    // Verify user exists first
-    const userExists = await prisma.user.findUnique({
+    // Create anonymous user if doesn't exist
+    let userExists = await prisma.user.findUnique({
       where: { id: userId },
     });
 
     if (!userExists) {
-      console.error('❌ User not found:', userId);
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+      console.log('👤 Creating anonymous user:', userId);
+      userExists = await prisma.user.create({
+        data: {
+          id: userId,
+          email: `${userId}@anonymous.local`, // Dummy email for anonymous users
+          name: profileData.name || 'Anonymous User',
+        },
+      });
+      console.log('✅ Anonymous user created');
     }
 
-    console.log('✅ User found, upserting profile...');
+    console.log('✅ User found/created, upserting profile...');
     const profile = await prisma.userProfile.upsert({
       where: { userId },
       update: {
