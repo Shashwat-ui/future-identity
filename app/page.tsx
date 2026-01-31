@@ -133,13 +133,13 @@ export default function Home() {
   return (
     <main className="min-h-screen max-h-screen w-full flex flex-col items-center relative overflow-y-scroll">
       <div className="fixed inset-0 -z-10 bg-[url('/bg.jpg.jpg')] bg-cover bg-center" />
-        <div className="flex justify-center mb-8 mt-4">
+        <div className="flex justify-center mb-6 sm:mb-8 mt-3 sm:mt-4 px-4">
         <button
           onClick={() => setScanning(true)}
-          className="group flex items-center gap-3 px-6 py-3 rounded-full bg-linear-to-r from-cyan-400 via-cyan-600 to-cyan-900 shadow-2xl border-2 border-cyan-300 hover:scale-105 transition-all duration-300 animate-futuristic-glow"
+          className="group flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-2.5 sm:py-3 rounded-full bg-linear-to-r from-cyan-400 via-cyan-600 to-cyan-900 shadow-2xl border-2 border-cyan-300 hover:scale-105 transition-all duration-300 animate-futuristic-glow"
         >
-          <FaQrcode className="text-3xl animate-pulse" />
-          <span className="font-bold text-lg text-white group-hover:text-cyan-300 transition">Scan QR</span>
+          <FaQrcode className="text-2xl sm:text-3xl animate-pulse" />
+          <span className="font-bold text-base sm:text-lg text-white group-hover:text-cyan-300 transition">Scan QR</span>
         </button>
       </div>
       {scanning && (

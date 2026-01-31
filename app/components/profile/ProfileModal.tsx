@@ -430,7 +430,8 @@ export default function ProfileModal({ profile, onClose, onSave, onQuickShare }:
           border: '2px solid rgba(255, 255, 255, 0.2)',
         },
       });
-      onClose();
+      // Delay close to show toast
+      setTimeout(() => onClose(), 500);
     } catch {
       toast.error('Failed to save profile. Please try again.', {
         duration: 2000,
