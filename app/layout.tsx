@@ -2,6 +2,7 @@
 import "./styles/globals.css";
 import { useState, useEffect } from "react";
 import { SessionProvider, useSession } from "next-auth/react";
+import { usePathname } from "next/navigation";
 import ProfileAvatar from "./components/profile/ProfileAvatar";
 import ProfileModal from "./components/profile/ProfileModal";
 import ModernSpinner from "./components/ui/ModernSpinner";
@@ -9,6 +10,7 @@ import type { UserProfile } from "./lib/profile";
 
 function RootLayoutInner({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
+  const pathname = usePathname();
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const loading = status === "loading";
@@ -89,14 +91,16 @@ function RootLayoutInner({ children }: { children: React.ReactNode }) {
         </div>
       ) : (
         <>
-          {/* Header with Profile Avatar */}
-          <header className="fixed top-0 right-0 p-4 z-40">
-            <ProfileAvatar
-              photo={profile?.photo}
-              name={profile?.name}
-              onClick={() => setShowProfileModal(true)}
-            />
-          </header>
+          {/* Header with Profile Avatar (hidden on scan/shared details page) */}
+          {pathname !== "/scan" && (
+            <header className="fixed top-0 right-0 p-4 z-40">
+              <ProfileAvatar
+                photo={profile?.photo}
+                name={profile?.name}
+                onClick={() => setShowProfileModal(true)}
+              />
+            </header>
+          )}
 
           {children}
         </>

@@ -69,15 +69,15 @@ export default function ScanPage() {
   function renderDetails() {
     if (!payload || !payload.data) return null;
     const entries = Object.entries(payload.data).filter(([, v]) => v != null && v !== '');
-    if (entries.length === 0) return <p>No details shared.</p>;
+    if (entries.length === 0) return <p className="text-gray-800">No details shared.</p>;
     return (
       <ul className="space-y-3">
         {entries.map(([k, v]) => (
-          <li key={k} className="flex gap-3 items-start bg-white/5 p-3 rounded-lg hover:bg-white/10 transition-colors">
-            <span className="font-semibold capitalize text-cyan-300 min-w-30">
+          <li key={k} className="flex gap-3 items-start bg-white/60 p-3 rounded-lg hover:bg-white/80 transition-colors">
+            <span className="font-semibold capitalize text-gray-700 min-w-30">
               {k.replace(/([A-Z])/g, ' $1')}:
             </span>
-            <span className="break-all text-white/90">{String(v)}</span>
+            <span className="break-all text-gray-900">{String(v)}</span>
           </li>
         ))}
       </ul>
@@ -105,9 +105,9 @@ export default function ScanPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6">
-      <div className="w-full max-w-2xl mx-auto bg-linear-to-br from-white/10 via-purple-900/20 to-cyan-900/20 rounded-2xl shadow-2xl border-2 border-cyan-400/50 p-8 backdrop-blur-xl animate-slidein">
-        <h2 className="text-3xl font-bold mb-6 text-center text-transparent bg-clip-text bg-linear-to-r from-cyan-400 via-purple-400 to-pink-400">
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gray-100">
+      <div className="w-full max-w-2xl mx-auto bg-white rounded-2xl shadow-2xl border border-gray-200 p-8 animate-slidein">
+        <h2 className="text-3xl font-bold mb-6 text-center text-gray-900">
           {payload?.type.charAt(0).toUpperCase() + (payload?.type.slice(1) || '')} Information
         </h2>
         {renderDetails()}

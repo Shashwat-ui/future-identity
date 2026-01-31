@@ -18,33 +18,61 @@ export default function QRScanner({ onScan, onClose }: { onScan: (data: string) 
 
   useEffect(() => {
     if (!videoRef.current) return;
+
     scannedRef.current = false;
+    setError(null);
+
     const reader = new BrowserQRCodeReader();
     readerRef.current = reader;
+    const videoElement = videoRef.current;
 
-    reader.decodeFromVideoDevice(
-  undefined,
-  videoRef.current,
-  (result, err) => {
-    if (result && !scannedRef.current) {
-      scannedRef.current = true;
-      onScan(result.getText());
-      stopCamera();
-    }
-    // Only set error once, and only for real errors
-    if (err && err.name === 'NotAllowedError' && !error) {
-      setError('Camera access denied. Please allow camera permission.');
-    } else if (err && err.name !== 'NotFoundException' && !error) {
-      setError('Scanning failed, please try again.');
-    }
-  }
-);
+    const handleResult = (result: any, err: any) => {
+      if (result && !scannedRef.current) {
+        scannedRef.current = true;
+        onScan(result.getText());
+        stopCamera();
+        return;
+      }
+
+      if (err) {
+        if (err.name === "NotAllowedError") {
+          setError(prev => prev || "Camera access denied. Please allow camera permission.");
+        } else if (err.name !== "NotFoundException") {
+          setError(prev => prev || "Scanning failed, please try again.");
+        }
+      }
+    };
+
+    const startScanner = async () => {
+      try {
+        // Prefer back camera when available
+        await reader.decodeFromConstraints(
+          {
+            video: { facingMode: { ideal: "environment" } },
+          } as MediaStreamConstraints,
+          videoElement,
+          handleResult
+        );
+      } catch {
+        try {
+          // Fallback to default camera selection
+          await reader.decodeFromVideoDevice(undefined, videoElement, handleResult);
+        } catch (err: any) {
+          if (!scannedRef.current) {
+            setError("Unable to access camera.");
+          }
+        }
+      }
+    };
+
+    void startScanner();
+
     return () => {
       scannedRef.current = true;
       stopCamera();
       readerRef.current = null;
     };
-  }, [onScan, error]);
+  }, [onScan]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-lg">

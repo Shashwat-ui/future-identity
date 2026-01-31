@@ -9,7 +9,7 @@ import toast, { Toaster } from 'react-hot-toast';
 interface ProfileModalProps {
   profile: UserProfile | null;
   onClose: () => void;
-  onSave: (data: Partial<UserProfile>) => void;
+  onSave: (data: Partial<UserProfile>) => Promise<void> | void;
   onQuickShare: () => void;
 }
 
@@ -225,47 +225,6 @@ export default function ProfileModal({ profile, onClose, onSave, onQuickShare }:
     }
     
     setFormData(updatedData);
-    
-    // Auto-save to database with debounce
-    setTimeout(async () => {
-      try {
-        await onSave(updatedData);
-        toast.success(
-          `${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)} ${fieldValue.trim() ? 'saved' : 'removed'}!`,
-          {
-            duration: 2000,
-            style: {
-              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-              color: '#fff',
-              borderRadius: '12px',
-              padding: '12px 16px',
-              fontSize: '14px',
-              border: '2px solid rgba(255, 255, 255, 0.2)',
-            },
-          }
-        );
-        
-        // Refresh verification status after save
-        fetch('/api/oauth/verify')
-          .then(res => res.json())
-          .then(data => {
-            if (data.verifications) {
-              setVerifications(data.verifications);
-            }
-          })
-          .catch(err => console.error('Failed to refresh verifications:', err));
-      } catch {
-        toast.error('Failed to save. Please try again.', {
-          duration: 2000,
-          style: {
-            background: '#ef4444',
-            color: '#fff',
-            borderRadius: '12px',
-            padding: '12px',
-          },
-        });
-      }
-    }, 800);
   };
 
   const handleOAuthConnect = async (provider: string) => {
@@ -457,9 +416,32 @@ export default function ProfileModal({ profile, onClose, onSave, onQuickShare }:
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(formData);
+    try {
+      await onSave(formData);
+      toast.success('Profile saved successfully!', {
+        duration: 2000,
+        style: {
+          background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+          color: '#fff',
+          borderRadius: '12px',
+          padding: '12px 16px',
+          border: '2px solid rgba(255, 255, 255, 0.2)',
+        },
+      });
+      onClose();
+    } catch {
+      toast.error('Failed to save profile. Please try again.', {
+        duration: 2000,
+        style: {
+          background: '#ef4444',
+          color: '#fff',
+          borderRadius: '12px',
+          padding: '12px',
+        },
+      });
+    }
   };
 
   const categories = [
