@@ -105,12 +105,44 @@ export default function ScanPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gray-100">
-      <div className="w-full max-w-2xl mx-auto bg-white rounded-2xl shadow-2xl border border-gray-200 p-8 animate-slidein">
-        <h2 className="text-3xl font-bold mb-6 text-center text-gray-900">
-          {payload?.type.charAt(0).toUpperCase() + (payload?.type.slice(1) || '')} Information
-        </h2>
-        {renderDetails()}
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-linear-to-br from-slate-900 via-slate-950 to-black">
+      <div className="w-full max-w-2xl mx-auto relative animate-slidein">
+        {/* Glow / gradient border wrapper */}
+        <div className="absolute -inset-0.5 bg-linear-to-r from-cyan-400 via-indigo-500 to-fuchsia-500 opacity-60 blur-2xl" aria-hidden="true" />
+
+        {/* Main content card */}
+        <div className="relative bg-white rounded-3xl shadow-2xl border border-gray-100/80 p-8 sm:p-10">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <p className="text-xs font-semibold tracking-[0.25em] uppercase text-gray-400 mb-2">
+                Shared Identity
+              </p>
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900">
+                {payload?.type.charAt(0).toUpperCase() + (payload?.type.slice(1) || '')} Details
+              </h2>
+            </div>
+            <div className="hidden sm:flex h-14 w-14 items-center justify-center rounded-2xl bg-linear-to-br from-cyan-100 via-sky-100 to-indigo-100 border border-cyan-200 shadow-md">
+              <span className="text-2xl">🔗</span>
+            </div>
+          </div>
+
+          <div className="mb-6 rounded-2xl bg-linear-to-r from-cyan-50 via-white to-indigo-50 border border-cyan-100 px-4 py-3 flex items-center gap-3">
+            <div className="h-9 w-9 rounded-full bg-cyan-500/10 flex items-center justify-center border border-cyan-200">
+              <span className="text-lg">📡</span>
+            </div>
+            <p className="text-sm sm:text-base text-gray-700">
+              You are viewing information that someone chose to share with you in real time.
+            </p>
+          </div>
+
+          <div className="space-y-4 max-h-105 overflow-y-auto pr-1">
+            {renderDetails()}
+          </div>
+
+          <p className="mt-6 text-xs text-gray-400 text-center">
+            This information is temporarily projected for this session only. Save what you need securely.
+          </p>
+        </div>
       </div>
       <DownloadAppSection />
       <style jsx global>{`

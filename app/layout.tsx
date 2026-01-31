@@ -52,11 +52,11 @@ function RootLayoutInner({ children }: { children: React.ReactNode }) {
     }
   }, [session?.user]);
 
-  const handleSaveProfile = async (data: Partial<UserProfile>) => {
+  const handleSaveProfile = async (data: Partial<UserProfile>): Promise<void> => {
     const userId = session?.user ? (session.user as unknown as { id?: string }).id : undefined;
     if (!userId) {
       console.error("No user session");
-      return;
+      throw new Error("No user session");
     }
     try {
       const res = await fetch("/api/profile/save", {
@@ -64,16 +64,23 @@ function RootLayoutInner({ children }: { children: React.ReactNode }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId, ...data }),
       });
-      const result = await res.json();
-      if (result.success) {
-        setProfile(result.profile);
-        // Don't auto-close modal on save - let user stay in the modal
-        // setShowProfileModal(false);
-        // Dispatch custom event to notify page component
-        window.dispatchEvent(new CustomEvent("profileUpdated", { detail: result.profile }));
+      if (!res.ok) {
+        console.error("Error saving profile: HTTP", res.status);
+        throw new Error("Failed to save profile");
       }
+
+      const result = await res.json();
+      if (!result.success || !result.profile) {
+        console.error("Error saving profile: unexpected response", result);
+        throw new Error("Failed to save profile");
+      }
+
+      setProfile(result.profile);
+      // Dispatch custom event to notify page component
+      window.dispatchEvent(new CustomEvent("profileUpdated", { detail: result.profile }));
     } catch (err) {
       console.error("Error saving profile:", err);
+      throw err instanceof Error ? err : new Error("Failed to save profile");
     }
   };
 
