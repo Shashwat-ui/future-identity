@@ -1,9 +1,10 @@
 
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import QRProjection from '@/components/identity/QRProjection';
 import { FaQrcode } from "react-icons/fa6";
 import QRScanner from "./components/identity/ORScanner";
+// UserProfile types are no longer needed directly in this file
 
 const options = [
   {
@@ -70,6 +71,50 @@ export default function Home() {
   const [scanning, setScanning] = useState(false);
   const [scannedData, setScannedData] = useState<string | null>(null);
 
+  useEffect(() => {
+    // Listen for quick share from profile
+    const handleQuickShare = () => {
+      // Get selected fields from localStorage
+      const quickShareDataStr = localStorage.getItem('quickShareData');
+      if (quickShareDataStr) {
+        const quickShareData = JSON.parse(quickShareDataStr);
+        setForm(quickShareData);
+        
+        // Determine which category to select based on the fields
+        let categoryType: string | null = null;
+        if (quickShareData.name || quickShareData.email || quickShareData.mobile) {
+          categoryType = 'contact';
+        } else if (quickShareData.instagram || quickShareData.facebook || quickShareData.linkedin) {
+          categoryType = 'social';
+        } else if (quickShareData.company || quickShareData.designation) {
+          categoryType = 'work';
+        } else if (quickShareData.upi || quickShareData.bankAccount) {
+          categoryType = 'payment';
+        } else if (quickShareData.home || quickShareData.holidayHome) {
+          categoryType = 'address';
+        }
+        
+        if (categoryType) {
+          const selectedOption = options.find(o => o.type === categoryType);
+          if (selectedOption) {
+            setSelected(selectedOption);
+          }
+        }
+        
+        // Auto-generate QR
+        setShowQR(true);
+        
+        // Clear the quick share data
+        localStorage.removeItem('quickShareData');
+      }
+    };
+    window.addEventListener('quickShareFromProfile', handleQuickShare);
+
+    return () => {
+      window.removeEventListener('quickShareFromProfile', handleQuickShare);
+    };
+  }, []);
+
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
   }
@@ -101,8 +146,21 @@ export default function Home() {
         <QRScanner
           onScan={(data) => {
             console.log("Scanned data:", data);
-            setScannedData(data);
             setScanning(false);
+            
+            // Check if it's a URL from our app
+            try {
+              const url = new URL(data);
+              // If it's our scan page, navigate to it
+              if (url.pathname.includes('/scan')) {
+                window.location.href = data;
+                return;
+              }
+            } catch {
+              // Not a valid URL, just show the data
+            }
+            
+            setScannedData(data);
           }}
           onClose={() => setScanning(false)}
         />

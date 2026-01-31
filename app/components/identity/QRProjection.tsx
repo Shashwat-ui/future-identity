@@ -1,6 +1,7 @@
 'use client';
 import QRCode from 'react-qr-code';
 import { useEffect, useState } from 'react';
+import ModernSpinner from '@/components/ui/ModernSpinner';
 import type { IdentityPayload } from '@/lib/identity';
 
 interface QRProjectionProps {
@@ -57,7 +58,11 @@ export default function QRProjection({ payload }: QRProjectionProps) {
   }
 
   if (!qrId) {
-    return <p className="text-sm opacity-70">Generating projection…</p>;
+    return (
+      <div className="w-full flex items-center justify-center p-8">
+        <ModernSpinner />
+      </div>
+    );
   }
 
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
